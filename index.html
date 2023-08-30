@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title></title>
+  <style>
+    body {
+      margin: 10px;
+      padding-bottom: 3rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #form {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      height: 3rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(15px);
+    }
+
+    #input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+    }
+
+    #input:focus {
+      outline: none;
+    }
+
+    #form>button {
+      background: #333;
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 3px;
+      outline: none;
+      color: #fff;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 5%;
+      padding: 25px;
+      border-radius: 25px;
+      margin-left: auto;
+      margin-right: auto;
+      width: 90%;
+      height: 80%;
+      backface-visibility: visible;
+      background-color: #818181;
+      overflow: scroll;
+    }
+
+    #messages>li {
+      border-radius: 25px;
+      overflow-wrap: break-word;
+      padding: 0.5rem 1rem;
+      width: fit-content;
+      max-width: 25%;
+      height: fit-content;
+      margin-bottom: 15px;
+      margin-top: 15px;
+      margin-left: 15px;
+      background: #d9d9d9;
+    }
+
+    #msgOut {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: rgba(255, 0, 0, 0);
+      overflow: scroll;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    var socket = io();
+    const uid = Math.floor(10000000000000000 + Math.random() * 90000000000000000);
+    var messages = document.getElementById('messages');
+    var form = document.getElementById('form');
+    var input = document.getElementById('input');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (input.value) {
+        socket.emit('chat message', [uid, input.value]);
+        input.value = '';
+      }
+    });
+
+    socket.on('chat message', function (msg) {
+      var item = document.createElement('li');
+      if (msg[0] == uid) {
+        item.style.backgroundColor = '#FFAC30'
+      }
+      item.textContent = msg[1];
+      messages.appendChild(item);
+      document.getElementById("messages").scrollTo(0, document.getElementById("messages").scrollHeight);
+    });
+  </script>
+</body>
+
+</html>
