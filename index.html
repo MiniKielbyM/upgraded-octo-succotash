@@ -1,20 +1,20 @@
-<!DOCTYPE html>
 <html>
 
 <head>
   <title></title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
     body {
-      margin: 10px;
-      padding-bottom: 3rem;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #353831;
+      font-family: "Space Mono", monospace;
     }
 
     #form {
       background: rgba(0, 0, 0, 0.15);
       padding: 0.25rem;
       position: fixed;
-      bottom: 0;
+      bottom: -1rem;
       left: 0;
       right: 0;
       display: flex;
@@ -24,11 +24,13 @@
     }
 
     #input {
+      color: #30AD75;
       border: none;
       padding: 0 1rem;
       flex-grow: 1;
       border-radius: 2rem;
       margin: 0.25rem;
+      background-color: #384039;
     }
 
     #input:focus {
@@ -60,21 +62,30 @@
       width: 90%;
       height: 80%;
       backface-visibility: visible;
-      background-color: #818181;
+      background-color: #4D5146;
       overflow: scroll;
+    }
+
+    #messages::-webkit-scrollbar {
+      display: none;
+    }
+
+    #messages {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
 
     #messages>li {
       border-radius: 25px;
       overflow-wrap: break-word;
-      padding: 0.5rem 1rem;
+      padding: 0.2px 1rem;
       width: fit-content;
       max-width: 25%;
-      height: fit-content;
+      height: min-content;
       margin-bottom: 15px;
       margin-top: 15px;
       margin-left: 15px;
-      background: #d9d9d9;
+      background: #3F5E5A;
     }
 
     #msgOut {
@@ -90,6 +101,7 @@
 <body>
   <ul id="messages"></ul>
   <form id="form" action="">
+    <input type="file" id="image-input">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
   <script src="/socket.io/socket.io.js"></script>
@@ -99,25 +111,33 @@
     const uid = Math.floor(10000000000000000 + Math.random() * 90000000000000000);
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');
-    var input = document.getElementById('input');
+    var txtinput = document.getElementById('input');
+    var input = document.getElementById("image-input");
+    
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (input.value) {
-        socket.emit('chat message', [uid, input.value]);
+      if (txtinput.value) {
+        socket.emit('chat message', [uid, txtinput.value]);
         input.value = '';
+        txtinput.value = '';
       }
     });
-
     socket.on('chat message', function (msg) {
       var item = document.createElement('li');
+      var img = document.createElement('img')
+      img.src = msg[2]
       if (msg[0] == uid) {
-        item.style.backgroundColor = '#FFAC30'
+        item.style.backgroundColor = '#20FC8F'
       }
-      item.textContent = msg[1];
+      item.innerHTML = "<p>" + msg[0] + "</p>" + msg[1];
       messages.appendChild(item);
       document.getElementById("messages").scrollTo(0, document.getElementById("messages").scrollHeight);
     });
+
+  </script>
+  <script>
+
   </script>
 </body>
 

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Image to Base64 Converter</title>
+</head>
+<body>
+  <input type="file" id="image-input">
+  <img id="b64img"/>
+  <script>
+    var input = document.getElementById("image-input");
+    var b64Img = document.getElementById("b64img");
+    input.addEventListener("change", function(event) {
+      var file = event.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function() {
+        var base64 = reader.result.split(",")[1];
+        var b64img = "data:image/png;base64," + base64;
+        b64Img.src = b64img;
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
+</html>
