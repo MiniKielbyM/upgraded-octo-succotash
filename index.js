@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   socket.on('chat message', msg => {
 console.log('chat msg received on server from client')
-    outmsg = [msg[0], md.render(msg[1])]
+    outmsg = [msg[0], md.render(msg[1]), msg[2]]
     io.emit('chat message', outmsg);
     console.log(msg)
     console.log(outmsg)

@@ -1,7 +1,8 @@
 <html>
 
 <head>
-  <title></title>
+  <title>strings</title>
+  <script language="javascript" src="lz-string.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -95,42 +96,65 @@
       background-color: rgba(255, 0, 0, 0);
       overflow: scroll;
     }
+
+    #clientsendimg {
+      max-width: 15%;
+      overflow: auto;
+      padding-bottom: 20px;
+    }
   </style>
 </head>
 
 <body>
   <ul id="messages"></ul>
-  <form id="form" action="">
-    <input type="file" id="image-input">
+  <form id="form">
+    <input type="file" id="file-input">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
   <script src="/socket.io/socket.io.js"></script>
+  <script id="lzutf8" src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.js"></script>
 
   <script>
+    var string = "This is my compression test.";
+    alert("Size of sample is: " + string.length);
+    var compressed = LZString.compress(string);
+    alert("Size of compressed sample is: " + compressed.length);
+    string = LZString.decompress(compressed);
+    alert("Sample is: " + string);
     var socket = io();
     const uid = Math.floor(10000000000000000 + Math.random() * 90000000000000000);
     var messages = document.getElementById('messages');
     var form = document.getElementById('form');
     var txtinput = document.getElementById('input');
-    var input = document.getElementById("image-input");
-    
+    var inputFile = document.getElementById('file-input');
+    var finalb64 = "";
+    // Add an event listener to the file input element
+    inputFile.addEventListener('change', function () {
+      // Check if a file is selected
+      if (inputFile.files && inputFile.files[0]) {
+        // Create a new FileReader object
+        const reader = new FileReader();
+        // Set a callback function when the FileReader finishes loading the file
+        reader.onload = function (e) {
+          finalb64 = e.target.result
+        }
+        // Read the selected file as a Data URL, which returns the base64 encoded file content
+        reader.readAsDataURL(inputFile.files[0]);
+      }
+    });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (txtinput.value) {
-        socket.emit('chat message', [uid, txtinput.value]);
-        input.value = '';
-        txtinput.value = '';
-      }
+      socket.emit('chat message', [uid, txtinput.value, finalb64]);
+      inputFile.value = '';
+      txtinput.value = '';
     });
     socket.on('chat message', function (msg) {
       var item = document.createElement('li');
-      var img = document.createElement('img')
-      img.src = msg[2]
       if (msg[0] == uid) {
         item.style.backgroundColor = '#20FC8F'
       }
-      item.innerHTML = "<p>" + msg[0] + "</p>" + msg[1];
+      item.innerHTML = "<p>" + msg[0] + "</p>" + msg[1] + '<img src="' + msg[2] + '" alt="client_image_' + msg[0] + '" id="clientsendimg"/>';
       messages.appendChild(item);
       document.getElementById("messages").scrollTo(0, document.getElementById("messages").scrollHeight);
     });
