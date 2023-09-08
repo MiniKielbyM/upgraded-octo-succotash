@@ -1,25 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Image to Base64 Converter</title>
+    <title>Image Compression Demo</title>
 </head>
 <body>
-  <input type="file" id="image-input">
-  <img id="b64img"/>
-  <script>
-    var input = document.getElementById("image-input");
-    var b64Img = document.getElementById("b64img");
-    input.addEventListener("change", function(event) {
-      var file = event.target.files[0];
-      var reader = new FileReader();
-      reader.onload = function() {
-        var base64 = reader.result.split(",")[1];
-        var b64img = "data:image/png;base64," + base64;
-        b64Img.src = b64img;
-      };
-      reader.readAsDataURL(file);
-    });
-  </script>
+    <h1>Image Compression Demo</h1>
+    
+    <!-- Input for selecting an image file -->
+    <input type="file" id="image-input" accept="image/*">
+    
+    <!-- Display the original and compressed images -->
+    <h2>Original Image:</h2>
+    <img id="original-image" alt="Original Image">
+    
+    <h2>Compressed Image:</h2>
+    <img id="compressed-image" alt="Compressed Image">
+    
+    <!-- Button to compress and decompress the image -->
+    <button id="compress-decompress-button">Compress and Decompress</button>
+    
+    <script src="lz-string.min.js"></script> <!-- Include the lz-string library -->
+    <script>
+        // Function to convert an image to Base64
+        function convertToBase64(file, callback) {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                callback(event.target.result);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        // Handle image input change
+        const imageInput = document.getElementById('image-input');
+        imageInput.addEventListener('change', function() {
+            const selectedFile = imageInput.files[0];
+            
+            if (selectedFile) {
+                // Convert the selected image to Base64
+                convertToBase64(selectedFile, function(base64String) {
+                    // Display the original image
+                    const originalImage = document.getElementById('original-image');
+                    originalImage.src = base64String;
+                });
+            }
+        });
+
+        // Handle compress and decompress button click
+        const compressDecompressButton = document.getElementById('compress-decompress-button');
+        compressDecompressButton.addEventListener('click', function() {
+            // Get the original Base64 string
+            const originalImage = document.getElementById('original-image');
+            const originalBase64 = originalImage.src.split(',')[1]; // Extract the Base64 part
+
+            // Compress the Base64 string using lz-string
+            const compressedBase64 = LZString.compressToBase64(originalBase64);
+
+            // Decompress the Base64 string using lz-string
+            const decompressedBase64 = LZString.decompressFromBase64(compressedBase64);
+
+            // Display the compressed image
+            const compressedImage = document.getElementById('compressed-image');
+            compressedImage.src = 'data:image/jpeg;base64,' + compressedBase64; // Change the format as needed
+        });
+    </script>
 </body>
 </html>

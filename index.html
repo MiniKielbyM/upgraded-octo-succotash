@@ -2,7 +2,6 @@
 
 <head>
   <title>strings</title>
-  <script language="javascript" src="lz-string.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -112,15 +111,32 @@
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
   <script src="/socket.io/socket.io.js"></script>
-  <script id="lzutf8" src="https://cdn.jsdelivr.net/npm/lzutf8/build/production/lzutf8.js"></script>
-
+  <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+    integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc=" crossorigin="anonymous"></script>
+  
   <script>
-    var string = "This is my compression test.";
-    alert("Size of sample is: " + string.length);
-    var compressed = LZString.compress(string);
-    alert("Size of compressed sample is: " + compressed.length);
-    string = LZString.decompress(compressed);
-    alert("Sample is: " + string);
+
+
+
+    
+function compress(string, encoding) {
+  const byteArray = new TextEncoder().encode(string);
+  const cs = new CompressionStream(encoding);
+  const writer = cs.writable.getWriter();
+  writer.write(byteArray);
+  writer.close();
+  return new Response(cs.readable).arrayBuffer();
+}
+
+function decompress(byteArray, encoding) {
+  const cs = new DecompressionStream(encoding);
+  const writer = cs.writable.getWriter();
+  writer.write(byteArray);
+  writer.close();
+  return new Response(cs.readable).arrayBuffer().then(function (arrayBuffer) {
+    return new TextDecoder().decode(arrayBuffer);
+  });
+}
     var socket = io();
     const uid = Math.floor(10000000000000000 + Math.random() * 90000000000000000);
     var messages = document.getElementById('messages');
@@ -136,7 +152,9 @@
         const reader = new FileReader();
         // Set a callback function when the FileReader finishes loading the file
         reader.onload = function (e) {
-          finalb64 = e.target.result
+          var stringToCompress = e.target.result;
+          finalb64 = LZUTF8.compress(stringToCompress);
+
         }
         // Read the selected file as a Data URL, which returns the base64 encoded file content
         reader.readAsDataURL(inputFile.files[0]);
@@ -151,6 +169,7 @@
     });
     socket.on('chat message', function (msg) {
       var item = document.createElement('li');
+
       if (msg[0] == uid) {
         item.style.backgroundColor = '#20FC8F'
       }
